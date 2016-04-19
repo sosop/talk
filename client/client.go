@@ -1,7 +1,6 @@
 package client
 
 import (
-	"encoding/json"
 	"net"
 	"sync"
 	"talk/protocol"
@@ -39,18 +38,14 @@ func (c *Client) Conn() {
 func (c *Client) Send(pro protocol.Protocol) {
 	defer c.wg.Done()
 	c.wg.Add(1)
-	data, err := json.Marshal(pro)
-	if err != nil {
-		// TODO log
-		return
-	}
-	_, err = c.conn.Write(data)
+	data := protocol.Serializer(pro)
+	_, err := c.conn.Write(data)
 	if err != nil {
 		// TODO log
 	}
 }
 
-func (c *Client) Read() string {
+func (c *Client) Read() protocol.Protocol {
 	defer c.wg.Done()
 	c.wg.Add(1)
 	buf := make([]byte, 0, protocol.MaxDataSize)
@@ -58,7 +53,7 @@ func (c *Client) Read() string {
 	if err != nil {
 		// TODO log
 	}
-	return string(buf)
+	return protocol.UnSerializer(buf)
 }
 
 func Close(c *Client) {

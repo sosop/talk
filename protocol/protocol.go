@@ -1,5 +1,9 @@
 package protocol
 
+import (
+	"encoding/json"
+)
+
 type Communicate string
 
 const (
@@ -26,3 +30,21 @@ type (
 		Images map[string][]byte
 	}
 )
+
+func Serializer(p Protocol) []byte {
+	data, err := json.Marshal(p)
+	if err != nil {
+		// TODO log
+		return nil
+	}
+	return data
+}
+
+func UnSerializer(data []byte) Protocol {
+	p := Protocol{}
+	err := json.Unmarshal(data, p)
+	if err != nil {
+		// TODO log
+	}
+	return p
+}

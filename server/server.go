@@ -1,18 +1,24 @@
 package server
 
-import "net"
+import (
+	"net"
+	"talk/protocol"
+)
 
 type (
 	Server struct {
 		net   string
 		laddr string
-		conns map[string]net.Conn
+		Store
 	}
 )
 
-func NewServer(network, laddr string) *Server {
-	conns := make(map[string]net.Conn, 1024)
-	return &Server{network, laddr, conns}
+func NewServerMemStore(network, laddr string) *Server {
+	return NewServer(network, laddr, NewMemoryStore())
+}
+
+func NewServer(network, laddr string, store Store) *Server {
+	return &Server{network, laddr, store}
 }
 
 func (s *Server) ServeTCP() {
@@ -25,6 +31,16 @@ func (s *Server) ServeTCP() {
 		if err != nil {
 			// TODO
 		}
-
+		go store(s, conn)
 	}
+}
+
+func store(s *Server, conn net.Conn) {
+	buf := make([]byte, 0, protocol.MaxDataSize)
+	_, err := conn.Read(buf)
+	if err != nil {
+		// TODO
+	}
+	p := protocol.UnSerializer(buf)
+	s.Store.Keep(p.From, conn)
 }
