@@ -1,8 +1,10 @@
 package client
 
 import (
+	"encoding/json"
 	"net"
 	"sync"
+	"talk/protocol"
 	"time"
 )
 
@@ -12,7 +14,8 @@ type (
 		addr    string
 		timeout time.Duration
 		conn    net.Conn
-		mu      sync.Mutex
+		newMu   sync.Mutex
+		closeMu sync.Mutex
 		wg      sync.WaitGroup
 	}
 )
@@ -22,36 +25,48 @@ func NewClient(net, addr string) *Client {
 }
 
 func (c *Client) Conn() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	defer c.newMu.Unlock()
+	c.newMu.Lock()
 	var err error
-	c.conn, err = net.DialTimeout(c.net, c.addr, c.timeout)
-	if err != nil {
-		panic(err)
+	if c.conn == nil {
+		c.conn, err = net.DialTimeout(c.net, c.addr, c.timeout)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
-func (c *Client) Send(msg string) {
+func (c *Client) Send(pro protocol.Protocol) {
 	defer c.wg.Done()
 	c.wg.Add(1)
-	_, err := c.conn.Write([]byte(msg))
+	data, err := json.Marshal(pro)
 	if err != nil {
-		// TODO
+		// TODO log
+		return
+	}
+	_, err = c.conn.Write(data)
+	if err != nil {
+		// TODO log
 	}
 }
 
 func (c *Client) Read() string {
 	defer c.wg.Done()
 	c.wg.Add(1)
-	buf := make([]byte, 0, 2048)
+	buf := make([]byte, 0, protocol.MaxDataSize)
 	_, err := c.conn.Read(buf)
 	if err != nil {
-		// TODO
+		// TODO log
 	}
 	return string(buf)
 }
 
 func Close(c *Client) {
-	defer c.conn.Close()
 	c.wg.Wait()
+	defer c.closeMu.Unlock()
+	c.closeMu.Lock()
+	if c.conn != nil {
+		c.conn.Close()
+		c.conn = nil
+	}
 }

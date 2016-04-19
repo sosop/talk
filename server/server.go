@@ -1,20 +1,18 @@
 package server
 
-import (
-	"io"
-	"net"
-	"os"
-)
+import "net"
 
 type (
 	Server struct {
 		net   string
 		laddr string
+		conns map[string]net.Conn
 	}
 )
 
-func NewServer(net, laddr string) *Server {
-	return &Server{net, laddr}
+func NewServer(network, laddr string) *Server {
+	conns := make(map[string]net.Conn, 1024)
+	return &Server{network, laddr, conns}
 }
 
 func (s *Server) ServeTCP() {
@@ -27,9 +25,6 @@ func (s *Server) ServeTCP() {
 		if err != nil {
 			// TODO
 		}
-		go func(net.Conn) {
-			defer conn.Close()
-			io.Copy(os.Stdout, conn)
-		}(conn)
+
 	}
 }
