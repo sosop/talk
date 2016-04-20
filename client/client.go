@@ -1,9 +1,11 @@
 package client
 
 import (
+	"io/ioutil"
 	"net"
 	"sync"
 	"talk/protocol"
+	. "talk/slog"
 	"time"
 )
 
@@ -41,17 +43,14 @@ func (c *Client) Send(pro protocol.Protocol) {
 	data := protocol.Serializer(pro)
 	_, err := c.conn.Write(data)
 	if err != nil {
-		// TODO log
+		Logger.Error(err)
 	}
 }
 
 func (c *Client) Read() protocol.Protocol {
-	defer c.wg.Done()
-	c.wg.Add(1)
-	buf := make([]byte, 0, protocol.MaxDataSize)
-	_, err := c.conn.Read(buf)
+	buf, err := ioutil.ReadAll(c.conn)
 	if err != nil {
-		// TODO log
+		Logger.Error(err)
 	}
 	return protocol.UnSerializer(buf)
 }

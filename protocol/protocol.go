@@ -1,8 +1,6 @@
 package protocol
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 type Communicate string
 
@@ -19,15 +17,15 @@ const (
 
 type (
 	Protocol struct {
-		From string
-		To   string
-		Comm Communicate
-		Type int
-		Data
+		From string      `json:"from"`
+		To   string      `json:"to"`
+		Comm Communicate `json:"comm"`
+		Type int         `json:"type"`
+		Data `json:"data"`
 	}
 	Data struct {
-		Text   []byte
-		Images map[string][]byte
+		Text   []byte            `json:"text"`
+		Images map[string][]byte `json:"images"`
 	}
 )
 
@@ -42,7 +40,7 @@ func Serializer(p Protocol) []byte {
 
 func UnSerializer(data []byte) Protocol {
 	p := Protocol{}
-	err := json.Unmarshal(data, p)
+	err := json.Unmarshal(data, &p)
 	if err != nil {
 		// TODO log
 	}

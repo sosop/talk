@@ -5,6 +5,6 @@ import "testing"
 var s *Server
 
 func TestServerTCP(t *testing.T) {
-	s = NewServer("tcp", ":8008")
+	s = NewServerMemStore("tcp", ":8008")
 	s.ServeTCP()
 }

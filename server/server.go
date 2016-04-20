@@ -1,8 +1,11 @@
 package server
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net"
 	"talk/protocol"
+	. "talk/slog"
 )
 
 type (
@@ -29,18 +32,19 @@ func (s *Server) ServeTCP() {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			// TODO
+			Logger.Error(err)
 		}
-		go store(s, conn)
+		store(s, conn)
 	}
 }
 
 func store(s *Server, conn net.Conn) {
-	buf := make([]byte, 0, protocol.MaxDataSize)
-	_, err := conn.Read(buf)
+	buf, err := ioutil.ReadAll(conn)
 	if err != nil {
-		// TODO
+		Logger.Error(err)
+		return
 	}
 	p := protocol.UnSerializer(buf)
+	fmt.Println(p)
 	s.Store.Keep(p.From, conn)
 }
