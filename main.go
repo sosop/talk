@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	s := server.NewServer("tcp", "8008")
+	s := server.NewServerMemStore("tcp", ":8008")
 	s.ServeTCP()
 }

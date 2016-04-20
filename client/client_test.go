@@ -12,5 +12,6 @@ func TestConn(t *testing.T) {
 	data := prot.Data{Text: []byte("hello")}
 	p := prot.Protocol{From: "test1", Comm: prot.CONN, Data: data}
 	c.Send(p)
+	c.Quit.Wait()
 	Close(c)
 }

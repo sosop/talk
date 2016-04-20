@@ -7,6 +7,7 @@ type Communicate string
 const (
 	CONN Communicate = "conn"
 	TALK Communicate = "talk"
+	PING Communicate = "ping"
 
 	// 8M
 	MaxDataSize = 1024 * 1024 * 8

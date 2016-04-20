@@ -8,7 +8,7 @@ var Logger slog.LoggerInterface
 
 func init() {
 	var err error
-	Logger, err = slog.LoggerFromConfigAsFile("config/slog.xml")
+	Logger, err = slog.LoggerFromConfigAsFile("../config/slog.xml")
 	if err != nil {
 		panic(err)
 	}
